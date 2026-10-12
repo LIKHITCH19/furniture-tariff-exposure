@@ -1,0 +1,18 @@
+# Census API key
+.env
+
+# raw API pulls - rebuild with the fetch scripts
+data/raw/*.csv
+data/raw/*.json
+data/raw/cache/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
