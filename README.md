@@ -24,6 +24,9 @@ Work in progress. So far this has the two download scripts:
   Census calculates on them.
 - `src/fetch_bls.py` pulls the BLS import price index for furniture.
 
+The tariff rules changed a lot over this period, so I wrote down what changed
+when in [docs/tariff_timeline.md](docs/tariff_timeline.md).
+
 ## Getting the data
 
 ```bash
@@ -44,3 +47,4 @@ https://api.census.gov/data/key_signup.html. The BLS script works without one.
   imports by HS code and country (`timeseries/intltrade/imports/hs`), Jan 2023 - Aug 2026.
 - US Bureau of Labor Statistics, [Import/Export Price Indexes](https://www.bls.gov/mxp/),
   series EIUIR41000 and EIUIR.
+- Tariff policy sources are listed in [docs/tariff_timeline.md](docs/tariff_timeline.md).

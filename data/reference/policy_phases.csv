@@ -1,0 +1,6 @@
+phase_id,phase,start_month,end_month,what_changed
+1,Baseline,2023-01-01,2025-01-01,"Before the 2025 tariffs. China furniture already carried the 2018-19 Section 301 duties"
+2,IEEPA tariffs,2025-02-01,2025-09-01,"China fentanyl tariff from Feb 4, reciprocal 10% baseline from Apr 5, country-specific rates from Aug 7"
+3,IEEPA + Section 232 wood,2025-10-01,2026-02-01,"25% Section 232 on upholstered wood furniture and kitchen cabinets/vanities from Oct 14; China fentanyl cut to 10% Nov 10"
+4,Section 122,2026-03-01,2026-07-01,"Supreme Court struck down IEEPA tariffs Feb 20; flat 10% Section 122 tariff Feb 24 to Jul 24"
+5,Section 301 (2026),2026-08-01,,"Section 301 tariffs of 10% or 12.5% from Jul 24 (12.5% for China, Vietnam, Thailand)"
