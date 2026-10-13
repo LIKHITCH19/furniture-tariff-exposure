@@ -17,7 +17,9 @@ to answer:
 I don't have a real company's data, so the importer is made up. All the
 market numbers are real.
 
-Work in progress. So far this has the two download scripts:
+Work in progress. So far: the download scripts, the cleaned data and the data checks.
+
+Download scripts:
 
 - `src/fetch_census.py` pulls monthly imports by country for 14 furniture
   product lines (HS chapter 94) from the Census trade API, including the duty
@@ -40,6 +42,32 @@ python src/fetch_bls.py
 
 The Census API needs a key now (free, takes a minute):
 https://api.census.gov/data/key_signup.html. The BLS script works without one.
+
+Then `python src/clean.py` builds the cleaned table and `python src/check_data.py`
+runs the checks.
+
+## The data
+
+`data/processed/furniture_imports.csv` has one row per month, supplier
+country and product line, Jan 2023 to Aug 2026: 41,189 rows across 202
+countries and 12 product lines (office chairs and sofa beds, 4 of the 14
+codes in the fetch script, aren't in this pull yet). Country groupings like the world total and
+"Asia" are split out into `census_totals.csv`, which is only used for the
+checks below. Columns are described in [docs/data_dictionary.md](docs/data_dictionary.md).
+
+The cleaned files are committed, so you don't need an API key to work with them.
+
+### Checks
+
+`src/check_data.py` exits with an error if any of these fail:
+
+- Country rows add back up to the Census world total, for both import value
+  and duty, in every month and product line (528 cells each, worst gap 0.0000%).
+- No gaps in the 44-month series, no duplicate month/country/product rows, no
+  negative values.
+- Duty rates fall in a sensible range (10 of 30,012 rows above 100%, all
+  shipments under $210K).
+- Annual totals are national scale ($30-33B a year for these 12 lines).
 
 ## Data sources
 
