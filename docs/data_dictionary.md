@@ -40,3 +40,15 @@ That is why the two value columns differ a little.
 
 Hand-built from `docs/tariff_timeline.md`. One row per policy phase with its
 first and last month; the last phase has no end month.
+
+## output/
+
+| File | Question it answers |
+|---|---|
+| `01_monthly_duty_burden.csv` | Effective duty rate each month, wood vs non-wood |
+| `02_supplier_share_by_year.csv` | Each major supplier's share of imports by year |
+| `03_duty_rate_by_country.csv` | Effective rate per major supplier in each policy phase |
+| `04_sourcing_shift.csv` | Change in share and value, same months two years apart |
+| `05_exposure_by_product.csv` | Rate change and extra duty per product line, last 12 months vs 2024 |
+| `06_rate_matrix.csv` | Latest 3-month effective rate per supplier x product line |
+| `07_price_vs_duty.csv` | BLS pre-duty price index next to a duty-inclusive version |

@@ -1,3 +1,4 @@
-# tested with: pandas 2.3.3, requests 2.34.2
+# tested with: pandas 2.3.3, requests 2.34.2, duckdb 1.5.6
 pandas>=2.0
 requests>=2.31
+duckdb>=1.1
