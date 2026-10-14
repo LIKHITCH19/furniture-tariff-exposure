@@ -17,7 +17,7 @@ to answer:
 I don't have a real company's data, so the importer is made up. All the
 market numbers are real.
 
-Work in progress. So far: the download scripts, the cleaned data and the data checks.
+Work in progress. So far: the download scripts, the cleaned data and checks, and the SQL analysis.
 
 Download scripts:
 
@@ -45,6 +45,23 @@ https://api.census.gov/data/key_signup.html. The BLS script works without one.
 
 Then `python src/clean.py` builds the cleaned table and `python src/check_data.py`
 runs the checks.
+
+## Questions
+
+Each query in `sql/` answers one question. `python src/run_analysis.py` runs
+them all with DuckDB and saves the results to `output/`.
+
+| Query | Question |
+|---|---|
+| `01_monthly_duty_burden` | How has the effective duty rate moved month to month, wood vs non-wood? |
+| `02_supplier_share_by_year` | Which countries supply US furniture, and how is that changing? |
+| `03_duty_rate_by_country` | What rate does each big supplier actually pay, in each policy phase? |
+| `04_sourcing_shift` | Who gained and lost share since 2024 (same months each year)? |
+| `05_exposure_by_product` | Which product lines picked up the most extra duty? |
+| `06_rate_matrix` | Current rate for each supplier and product line |
+| `07_price_vs_duty` | Did suppliers cut prices, or did importers pay the tariff? |
+
+Write-up and charts are next.
 
 ## The data
 
