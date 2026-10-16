@@ -52,3 +52,5 @@ first and last month; the last phase has no end month.
 | `05_exposure_by_product.csv` | Rate change and extra duty per product line, last 12 months vs 2024 |
 | `06_rate_matrix.csv` | Latest 3-month effective rate per supplier x product line |
 | `07_price_vs_duty.csv` | BLS pre-duty price index next to a duty-inclusive version |
+| `dashboard.html` | Interactive dashboard (open in a browser) |
+| `landed_cost_model.xlsx` | Landed-cost scenario model |

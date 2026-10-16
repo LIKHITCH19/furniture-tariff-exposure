@@ -14,10 +14,12 @@ to answer:
 2. Where is the rest of the market moving its sourcing?
 3. What would moving our own volume cost or save?
 
-I don't have a real company's data, so the importer is made up. All the
-market numbers are real.
+I don't have a real company's data, so the importer in the scenario model is
+made up (and labeled that way in the workbook). All the market numbers are
+real.
 
-The scenario model for question 3 is still in progress.
+- **Interactive dashboard:** `output/dashboard.html` (download and open in a browser)
+- **Scenario model:** `output/landed_cost_model.xlsx`
 
 ## The short version
 
@@ -32,6 +34,9 @@ The scenario model for question 3 is still in progress.
 - China's share of US furniture imports fell from 28.2% to 17.0%. Vietnam
   picked up the most share, but Cambodia and Thailand are where volume actually
   grew.
+- For the importer in the model, moving its China volume to Vietnam cuts
+  landed cost by about 6%, as long as Vietnamese factories don't charge more
+  than ~11% above China on upholstered seating and ~20% on bedroom furniture.
 
 ## Background
 
@@ -107,9 +112,55 @@ duty. If suppliers were absorbing the tariffs, it would have dropped as the
 duty went up. It went up 3.1%. With duty included, the cost of imported
 furniture peaked about 21% above January 2025 and is still about 15% higher.
 
+## 5. What would a sourcing shift do for our importer?
+
+The Excel model takes a made-up $40M-a-year importer and applies the real
+duty rates from the last three months of data (Jun-Aug 2026), plus freight and
+customs fees, to four sourcing scenarios:
+
+| Scenario | Landed cost | vs today |
+|---|---:|---:|
+| Today's mix (30-70% China depending on line) | $53.1M | |
+| Move China volume to Vietnam | $49.9M | -$3.2M (-6.1%) |
+| Spread it across Vietnam, Cambodia, Indonesia | $49.9M | -$3.3M (-6.2%) |
+| Nearshore it to Mexico | $48.2M | -$4.9M (-9.3%) |
+
+These assume the new factories charge the same price as China, which they
+won't. So the more useful output is the break-even sheet: how much more a
+Vietnamese factory can charge before the move stops paying off.
+
+| Product line | Break-even premium, Vietnam vs China |
+|---|---:|
+| Wooden bedroom furniture | 20.6% |
+| Other metal furniture | 20.6% |
+| Other wooden furniture | 18.1% |
+| Kitchen cabinets and vanities | 11.1% |
+| Upholstered wood-frame seating | 10.6% |
+| Upholstered metal-frame seating | 7.5% |
+
+## If I were the importer
+
+1. **Move bedroom, other wood and other metal furniture first.** That's where the
+   China gap is widest: a new supplier can be about 18-21% more expensive and
+   still come out ahead.
+2. **Don't expect much from moving upholstered seating or cabinets.** Section
+   232 applies from every country, so the room is only about 10-11%. On these
+   lines, negotiating price with existing suppliers is likely worth more than a
+   move.
+3. **Check USMCA qualification before taking the Mexico number seriously.**
+   Mexico wins in the model on cheaper freight and low duty on its
+   non-upholstered furniture (0% on bedroom furniture, under 5% on metal
+   furniture, most likely USMCA goods). Section 232 still applies to Mexican
+   seating and cabinets. If the goods don't qualify for USMCA, a big part of
+   the advantage goes away.
+4. **Ask a customs broker about IEEPA refunds.** Duty paid under IEEPA between
+   February 2025 and February 2026 may be recoverable, which could be a lot of
+   money for a company this size.
+
 ## How the numbers were checked
 
-`src/check_data.py` exits with an error if any of these fail:
+`src/check_data.py` runs before any analysis and stops the pipeline if
+something is off:
 
 - Country rows add back up to the Census world total, for both import value
   and duty, in every month and product line (528 cells each, worst gap 0.0000%).
@@ -118,6 +169,10 @@ furniture peaked about 21% above January 2025 and is still about 15% higher.
 - Duty rates fall in a sensible range (10 of 30,012 rows above 100%, all
   shipments under $210K).
 - Annual totals are national scale ($30-33B a year for these 12 lines).
+
+I also checked a BLS value against FRED's published copy of the same series,
+and recalculated every scenario in the Excel model independently in Python;
+they match to the dollar.
 
 ## Caveats
 
@@ -137,6 +192,8 @@ furniture peaked about 21% above January 2025 and is still about 15% higher.
 - Office chairs and sofa beds aren't in the numbers yet. The 2022 HS revision
   split their codes, and the old ones return nothing. The new codes are in the
   fetch script; rerunning it adds them.
+- The company in the scenario model is invented. Freight rates and the
+  sourcing mix are placeholders to be replaced with real quotes.
 
 ## Run it yourself
 
@@ -148,27 +205,34 @@ pip install -r requirements.txt
 # see .env.example). The cleaned data is already in data/processed/.
 python src/fetch_census.py
 python src/fetch_bls.py
-python src/clean.py
 
-python src/check_data.py
-python src/run_analysis.py
-python src/make_charts.py
+# rebuild everything: clean -> checks -> SQL -> charts -> dashboard -> Excel model
+python run_all.py
 ```
 
-## The queries
+## What's in here
 
-Each query in `sql/` answers one question. `python src/run_analysis.py` runs
-them all with DuckDB and saves the results to `output/`.
-
-| Query | Question |
-|---|---|
-| `01_monthly_duty_burden` | How has the effective duty rate moved month to month, wood vs non-wood? |
-| `02_supplier_share_by_year` | Which countries supply US furniture, and how is that changing? |
-| `03_duty_rate_by_country` | What rate does each big supplier actually pay, in each policy phase? |
-| `04_sourcing_shift` | Who gained and lost share since 2024 (same months each year)? |
-| `05_exposure_by_product` | Which product lines picked up the most extra duty? |
-| `06_rate_matrix` | Current rate for each supplier and product line |
-| `07_price_vs_duty` | Did suppliers cut prices, or did importers pay the tariff? |
+```
+src/
+  fetch_census.py        download monthly imports + duty from the Census API
+  fetch_bls.py           download the BLS import price index
+  clean.py               tidy table, split out country groupings, duty rate
+  check_data.py          data quality checks (stops the pipeline on failure)
+  run_analysis.py        runs every query in sql/ with DuckDB
+  make_charts.py         PNG charts for this README
+  build_dashboard.py     interactive dashboard (template: dashboard_template.html)
+  build_model.py         Excel landed-cost scenario model
+sql/                     one query per business question
+data/
+  processed/             cleaned Census data + BLS prices (committed, so the
+                         analysis runs without an API key)
+  reference/             policy phases, built from docs/tariff_timeline.md
+docs/
+  tariff_timeline.md     what changed when, with sources
+  data_dictionary.md     every column and output file
+output/                  query results, dashboard, Excel model
+images/                  charts used above
+```
 
 ## Data sources
 
@@ -177,3 +241,5 @@ them all with DuckDB and saves the results to `output/`.
 - US Bureau of Labor Statistics, [Import/Export Price Indexes](https://www.bls.gov/mxp/),
   series EIUIR41000 and EIUIR.
 - Tariff policy sources are listed in [docs/tariff_timeline.md](docs/tariff_timeline.md).
+
+Built with Python (pandas, DuckDB, matplotlib, openpyxl), SQL, Plotly.js and Excel.
