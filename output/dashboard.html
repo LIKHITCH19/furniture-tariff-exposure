@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Furniture Tariff Exposure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* dark mode colors are below the light ones */
+:root {
+  --page: #f5f6f7;
+  --surface: #ffffff;
+  --ink: #15191d;
+  --ink-2: #4b535b;
+  --muted: #868e96;
+  --line: #e2e5e8;
+  --wash: #eef0f2;
+  --blue: #2a78d6;
+  --orange: #eb6834;
+  --aqua: #1baf7a;
+  --red: #e34948;
+  --good: #1f7a3a;
+  --bad: #b8322f;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0e1113; --surface: #161a1d; --ink: #edf0f2; --ink-2: #b8bfc5; --muted: #848c93;
+    --line: #2a3035; --wash: #1d2226; --blue: #3987e5; --orange: #d95926; --aqua: #199e70;
+    --red: #e66767; --good: #4cc26e; --bad: #f07a77; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #0e1113; --surface: #161a1d; --ink: #edf0f2; --ink-2: #b8bfc5; --muted: #848c93;
+  --line: #2a3035; --wash: #1d2226; --blue: #3987e5; --orange: #d95926; --aqua: #199e70;
+  --red: #e66767; --good: #4cc26e; --bad: #f07a77; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 48px; display: grid; gap: 28px; }
+h1, h2 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; margin: 0; color: var(--ink); }
+h1 { font-size: clamp(1.9rem, 4.5vw, 2.6rem); line-height: 1.1; letter-spacing: -0.01em; }
+h2 { font-size: 1.25rem; line-height: 1.25; }
+p { margin: 0; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.dek { color: var(--ink-2); max-width: 68ch; margin-top: 10px; }
+.meta { font-size: 0.82rem; color: var(--muted); margin-top: 10px; }
+header { display: grid; gap: 4px; }
+
+/* policy timeline */
+.timeline { display: grid; gap: 10px; }
+.strip { display: flex; height: 10px; border-radius: 3px; overflow: hidden; gap: 2px; }
+.strip span { display: block; height: 100%; }
+.phases { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.phase { min-width: 0; border-top: 2px solid var(--line); padding-top: 8px; }
+.phase b { display: block; font-size: 0.86rem; font-weight: 600; }
+.phase .when { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); }
+.phase p { font-size: 0.8rem; color: var(--ink-2); margin-top: 4px; }
+
+/* headline figures */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 4px; align-content: start; }
+.kpi .label { font-size: 0.82rem; color: var(--ink-2); }
+.kpi .value { font-size: 1.9rem; font-weight: 600; line-height: 1.15; }
+.kpi .delta { font-size: 0.8rem; color: var(--muted); }
+.kpi .delta strong { font-weight: 600; }
+.up-bad { color: var(--bad); }
+.down-bad { color: var(--bad); }
+
+/* chart cards */
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 18px 10px; min-width: 0; display: grid; gap: 6px; align-content: start; }
+.card .sub { font-size: 0.85rem; color: var(--ink-2); }
+.card .src { font-size: 0.74rem; color: var(--muted); padding-bottom: 6px; }
+.chart { width: 100%; height: 340px; }
+.chart.tall { height: 400px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 0.85rem; color: var(--ink-2); }
+select {
+  font: inherit; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px;
+}
+select:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+
+/* table */
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+th, td { padding: 8px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+td:nth-child(2) { white-space: normal; min-width: 200px; }
+th { font-weight: 600; color: var(--ink-2); font-size: 0.78rem; }
+th:nth-child(-n+2), td:nth-child(-n+2) { text-align: left; }
+td.code { font-family: var(--font-mono); color: var(--ink-2); }
+.tag { display: inline-block; font-size: 0.7rem; padding: 1px 6px; border-radius: 3px; background: var(--wash); color: var(--ink-2); margin-left: 6px; }
+
+.notes { display: grid; gap: 10px; font-size: 0.86rem; color: var(--ink-2); max-width: 78ch; }
+.notes ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.notes a { color: var(--blue); }
+
+@media (max-width: 860px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid2 { grid-template-columns: minmax(0, 1fr); }
+  .phases { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 460px) {
+  .wrap { padding-inline: 16px; }
+  .kpi .value { font-size: 1.6rem; }
+  .phases { grid-template-columns: minmax(0, 1fr); }
+  .chart { height: 300px; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">US imports &middot; HS chapter 94 &middot; furniture</span>
+    <h1>Furniture tariff exposure</h1>
+    <p class="dek">How much duty US furniture importers are paying, which product lines took the biggest hit,
+      and where sourcing is moving. Built from Census trade records and the BLS import price index.</p>
+    <p class="meta" id="meta"></p>
+  </header>
+
+  <section class="timeline" aria-label="Tariff policy phases">
+    <div class="strip" id="strip"></div>
+    <div class="phases" id="phases"></div>
+  </section>
+
+  <section class="kpis" id="kpis" aria-label="Headline figures"></section>
+
+  <section class="card">
+    <h2>Effective duty rate, month by month</h2>
+    <p class="sub">Calculated duty as a share of customs value. Wood lines picked up the Section 232 duty from October 2025.</p>
+    <div class="chart tall" id="c-monthly"></div>
+    <p class="src">Source: US Census Bureau international trade API.</p>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Duty rate by supplier</h2>
+      <div class="controls">
+        <label for="supplier">Supplier</label>
+        <select id="supplier"></select>
+        <span>compared with all suppliers</span>
+      </div>
+      <div class="chart" id="c-supplier"></div>
+      <p class="src">Source: US Census Bureau. Ten largest suppliers by value.</p>
+    </section>
+
+    <section class="card">
+      <h2>Who paid the tariff</h2>
+      <p class="sub">Supplier prices before duty barely moved, so the duty landed on US buyers. Index, Jan 2025 = 100.</p>
+      <div class="chart" id="c-prices"></div>
+      <p class="src">Sources: BLS import price index EIUIR41000 (excludes duty); Census calculated duty. BLS did not publish Oct 2025.</p>
+    </section>
+  </div>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Where sourcing moved</h2>
+      <p class="sub" id="shift-sub"></p>
+      <div class="chart tall" id="c-shift"></div>
+      <p class="src">Source: US Census Bureau. Suppliers with $50M+ in either period; changes under 0.1 points hidden.</p>
+    </section>
+
+    <section class="card">
+      <h2>Extra duty by product line</h2>
+      <p class="sub">Last 12 months of duty minus what the same goods would have paid at 2024 rates.</p>
+      <div class="chart tall" id="c-extra"></div>
+      <p class="src">Source: US Census Bureau.</p>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Product line detail</h2>
+    <p class="sub" id="table-sub"></p>
+    <div class="table-wrap">
+      <table id="products">
+        <thead>
+          <tr>
+            <th>HS6</th><th>Product line</th><th>Imports, last 12 mo</th><th>vs 2024</th>
+            <th>Duty rate 2024</th><th>Duty rate now</th><th>Extra duty</th><th>China share 2024</th><th>China share now</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="notes">
+    <h2>Notes on the data</h2>
+    <ul>
+      <li>Effective rate = calculated duty / customs value of goods entered for consumption. It is an average across everything shipped under a product code, so a single item can sit above or below it.</li>
+      <li>November 2025 shows a one-month drop in duty on upholstered wood seating (940161) and kitchen cabinets (940340) from suppliers other than China, then a full recovery in December. I could not find a policy change that explains it, so it is left in the data and flagged here.</li>
+      <li>The BLS series covers "furniture, household goods", which is broader than HS chapter 94. It is the closest furniture import price series BLS still publishes monthly.</li>
+      <li id="missing-note" hidden></li>
+    </ul>
+    <p>Sources: <a href="https://www.census.gov/data/developers/data-sets/international-trade.html">US Census Bureau international trade API</a> &middot;
+      <a href="https://www.bls.gov/mxp/">BLS Import/Export Price Indexes</a></p>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-basic-dist-min@2.35.2/plotly-basic.min.js"></script>
+<script>
+const DATA = {"meta":{"start":"2023-01-01","latest":"2026-08-01","lines":12,"countries":202,"ttm":"Sep 2025 to Aug 2026","missing":"Not yet in this build: swivel seats of wood (940131), swivel seats, other (mostly office chairs) (940139), seats convertible into beds, of wood (940141), seats convertible into beds, other (940149). Rerun src/fetch_census.py to add them."},"phases":[{"name":"Baseline","short":"Baseline","when":"Jan 2023 to Jan 2025","what":"Before the 2025 tariffs. China furniture already carried the 2018-19 Section 301 duties","months":25,"x0":"2022-12-17","x1":"2025-01-16","mid":"2024-01-01"},{"name":"IEEPA tariffs","short":"IEEPA","when":"Feb 2025 to Sep 2025","what":"China fentanyl tariff from Feb 4, reciprocal 10% baseline from Apr 5, country-specific rates from Aug 7","months":8,"x0":"2025-01-17","x1":"2025-09-16","mid":"2025-05-18"},{"name":"IEEPA + Section 232 wood","short":"IEEPA + \u00a7232","when":"Oct 2025 to Feb 2026","what":"25% Section 232 on upholstered wood furniture and kitchen cabinets/vanities from Oct 14; China fentanyl cut to 10% Nov 10","months":5,"x0":"2025-09-16","x1":"2026-02-16","mid":"2025-12-01"},{"name":"Section 122","short":"\u00a7122","when":"Mar 2026 to Jul 2026","what":"Supreme Court struck down IEEPA tariffs Feb 20; flat 10% Section 122 tariff Feb 24 to Jul 24","months":5,"x0":"2026-02-14","x1":"2026-07-16","mid":"2026-05-01"},{"name":"Section 301 (2026)","short":"\u00a7301","when":"Aug 2026 to now","what":"Section 301 tariffs of 10% or 12.5% from Jul 24 (12.5% for China, Vietnam, Thailand)","months":1,"x0":"2026-07-17","x1":"2026-08-16","mid":"2026-08-01"}],"kpis":{"rate_now":0.1752437541346133,"rate_2024":0.05316260355514126,"extra_duty":3845902855.8993063,"china_base":0.2817136417323034,"china_now":0.1703038005672267,"period":"Jan\u2013Aug 2026","price_change":0.031073446327683607,"cost_change":0.1493843159900068},"monthly":{"months":["2023-01-01","2023-02-01","2023-03-01","2023-04-01","2023-05-01","2023-06-01","2023-07-01","2023-08-01","2023-09-01","2023-10-01","2023-11-01","2023-12-01","2024-01-01","2024-02-01","2024-03-01","2024-04-01","2024-05-01","2024-06-01","2024-07-01","2024-08-01","2024-09-01","2024-10-01","2024-11-01","2024-12-01","2025-01-01","2025-02-01","2025-03-01","2025-04-01","2025-05-01","2025-06-01","2025-07-01","2025-08-01","2025-09-01","2025-10-01","2025-11-01","2025-12-01","2026-01-01","2026-02-01","2026-03-01","2026-04-01","2026-05-01","2026-06-01","2026-07-01","2026-08-01"],"all":[0.0607632129729075,0.0647105866280451,0.0540057379547793,0.0612113561548891,0.0579215941743698,0.0532062248045376,0.0522013245681361,0.0468059935068182,0.048286230410524,0.0514478717860932,0.0537180797547543,0.057341419219649,0.0642652477394899,0.0601574798208106,0.0526567327200812,0.0548770197426586,0.0562476620600303,0.0561662639443761,0.0551207737137294,0.0510953820178392,0.0459684338278689,0.0433210251723458,0.0471806737816215,0.0510938219884876,0.0542710658157233,0.0565378726732996,0.0857069154950575,0.1105161973607001,0.1495528975907574,0.1544420782193698,0.1804767914313032,0.181739232617628,0.2126258354185288,0.252532959694914,0.1886613612323845,0.237686654866379,0.2591485758729716,0.2412836541506717,0.1955223946574773,0.1635719587143578,0.1615171264513578,0.1658720036171324,0.1641907354406915,0.1752437541346133],"wood":[0.0379457988529482,0.0370752586945579,0.0283217531098057,0.0361232947924697,0.0378773751412461,0.0370193883364854,0.0370218328556936,0.0329871496936472,0.0340538863004897,0.0375729607769072,0.0367103147503927,0.0369710628537099,0.0411474011565824,0.0340382296544248,0.0302905913108619,0.0306399868673393,0.032922053175872,0.0339114315902759,0.0345409329397787,0.0312985611305209,0.0280338871419649,0.0277799465168629,0.029636489994071,0.0301849634034274,0.0299279879731416,0.031021481832157,0.0414986023446075,0.0506024296527329,0.0928344855747705,0.1067816644381919,0.1236644523450789,0.1278160641035118,0.1591208535606535,0.2135312585230127,0.1312323403513552,0.2050769175236412,0.2267939713750507,0.2108699454524561,0.1716671388774033,0.167616955498508,0.171442634455178,0.1709764744591775,0.1697724970540135,0.1795448757369372],"nonwood":[0.0968770380007186,0.1040883718518549,0.0916145446192535,0.1004310027879475,0.0917525995679322,0.0819522246001313,0.0797046555058963,0.0734967892875815,0.0742093762807784,0.0769904544463096,0.0850400500993111,0.093717563884965,0.1029124668037328,0.1038998721826449,0.0905036035626623,0.0918869350554329,0.0952607983389093,0.0933002022902401,0.0918838728735251,0.0876109618585229,0.0812431419006853,0.0741675936177461,0.0801347145516554,0.0864879450732151,0.0927722095228656,0.0959257372042058,0.1587415891633249,0.2142274184803873,0.2578888722303447,0.2596319067978027,0.2962758829210882,0.2989804326802723,0.3298532071959492,0.337214330806195,0.3067757280064698,0.3001892823263398,0.3144575949559365,0.2880728964190093,0.2311949532540361,0.1577277249729308,0.1464580219327459,0.1575499716426884,0.1553522382844039,0.1678870358959958]},"suppliers":{"months":["2023-01-01","2023-02-01","2023-03-01","2023-04-01","2023-05-01","2023-06-01","2023-07-01","2023-08-01","2023-09-01","2023-10-01","2023-11-01","2023-12-01","2024-01-01","2024-02-01","2024-03-01","2024-04-01","2024-05-01","2024-06-01","2024-07-01","2024-08-01","2024-09-01","2024-10-01","2024-11-01","2024-12-01","2025-01-01","2025-02-01","2025-03-01","2025-04-01","2025-05-01","2025-06-01","2025-07-01","2025-08-01","2025-09-01","2025-10-01","2025-11-01","2025-12-01","2026-01-01","2026-02-01","2026-03-01","2026-04-01","2026-05-01","2026-06-01","2026-07-01","2026-08-01"],"all":[0.0607632129729075,0.0647105866280451,0.0540057379547793,0.0612113561548891,0.0579215941743698,0.0532062248045376,0.0522013245681361,0.0468059935068182,0.048286230410524,0.0514478717860932,0.0537180797547543,0.057341419219649,0.0642652477394899,0.0601574798208106,0.0526567327200812,0.0548770197426586,0.0562476620600303,0.0561662639443761,0.0551207737137294,0.0510953820178392,0.0459684338278689,0.0433210251723458,0.0471806737816215,0.0510938219884876,0.0542710658157233,0.0565378726732996,0.0857069154950575,0.1105161973607001,0.1495528975907574,0.1544420782193698,0.1804767914313032,0.181739232617628,0.2126258354185288,0.252532959694914,0.1886613612323845,0.237686654866379,0.2591485758729716,0.2412836541506717,0.1955223946574773,0.1635719587143578,0.1615171264513578,0.1658720036171324,0.1641907354406915,0.1752437541346133],"rates":{"Vietnam":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0034167557640751205,0.011331934846011178,0.06189401017419542,0.10532529302710361,0.1104672622978222,0.11637110262274714,0.17380188706118146,0.22289471045136805,0.12263457397349986,0.20961774565787697,0.23180646238315442,0.2188305994120718,0.1798154821545712,0.16673714982186072,0.16347444207193565,0.165831396454649,0.16344379983290966,0.1797677381688781],"China":[0.20359544719419823,0.2017640055539077,0.19994729027343686,0.20219261633876207,0.2025805684357233,0.19892732085557202,0.19817673957366358,0.1937853461091598,0.19168207544806984,0.19926460246210953,0.20081409641496945,0.19264832965966772,0.19420715197285796,0.1986597106877948,0.19601453281448505,0.19500612427640981,0.1994139170204291,0.20396222982083625,0.20636645917630833,0.20699688009622866,0.2083504265889957,0.20272294191541437,0.2045417958729155,0.19552458008832874,0.19300789506363367,0.20562219570910462,0.3415899786667607,0.442775085033995,0.6033973311283282,0.5698102510020844,0.5640083345083665,0.5728651219484517,0.5898751409780969,0.5985839229934402,0.5237869405110683,0.49615009703656265,0.4975325463792482,0.46240618554292656,0.3954667218671523,0.32977081785117496,0.3163073464929948,0.3240887164561279,0.31946812010550074,0.34825120016961075],"Canada":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.004590512085697642,0.01142273231769731,0.01655911660923977,0.01827647907776327,0.02169398407527689,0.02471086582344383,0.036525364486425606,0.04739338233819837,0.027195950471293515,0.06249004197435093,0.05939458047540873,0.06396381241155744,0.060155092441589474,0.03957726670458956,0.034553404377517895,0.03541611768757576,0.03413518034261146,0.06598654800243002],"Mexico":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01657547174044008,0.015533209119564132,0.03630277347840153,0.02889297279715232,0.0285304246648168,0.02575141442710405,0.03590380308085381,0.08753250501984544,0.033433048137332215,0.11538056664297094,0.14493156588694267,0.14251883498561146,0.1293329136148758,0.10388909761610511,0.09408279618749453,0.09634916975993466,0.0973295192587848,0.09355219616182466],"Italy":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.002356848709676031,0.01960402831867904,0.08977598278667,0.11088586270444749,0.11423240669269771,0.1252738792668121,0.1570892866068943,0.16614744085910996,0.16876468516309975,0.16600410395983906,0.16243083469142638,0.14575980469945776,0.13466151369437404,0.12362406967910176,0.1196730860425869,0.11790962860954153,0.11191678342521882,0.11827168509038737],"Malaysia":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.001823030898898544,0.004899538983055437,0.035140374303287696,0.08652516241061761,0.10416372756002898,0.10558001313861133,0.14488200431873993,0.20509315564958436,0.15586439276688374,0.2069663443934721,0.20973566338008062,0.19867708476562532,0.14381240753074562,0.14197340949132864,0.13827367091639567,0.13742302008543855,0.13013807748141562,0.13954599046134916],"Indonesia":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.002583583896461803,0.004105485825216018,0.029736613714652367,0.09995651714522162,0.10292229239615916,0.11505406720381345,0.14862511666876466,0.19885627852096346,0.1783173916586261,0.192728008466677,0.1914966639334222,0.17311320202933655,0.1155292675480881,0.1155643065570463,0.11391364647760963,0.11714740349326876,0.10675640293293945,0.11290145066062002],"Thailand":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.02193636084573071,0.0604214791357428,0.08299209270635664,0.12875318665554789,0.13595462851085374,0.15189498914879263,0.21488733552553904,0.26848371334784876,0.21302166083786095,0.2669377362697743,0.27250935836604173,0.25920595016656095,0.21938225849395282,0.14880873534492328,0.1303986979079789,0.14070249985249078,0.1290741471948864,0.15418277879196746],"Cambodia":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.02233863266009729,0.04859629965446099,0.08633444217429861,0.15037448441062837,0.136808731045714,0.133141587781084,0.1813510004533698,0.24228688504994206,0.1214145099174307,0.22900620424126583,0.2511506461817244,0.2330652107111054,0.20186593579578688,0.1645833851908115,0.15769121934802385,0.16619862622187045,0.1591251841142907,0.16854604665094616],"India":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.014041211930339621,0.026317849363106865,0.074196887101837,0.12662718490996905,0.13460458021927824,0.15698565081865531,0.30800168324854343,0.4875357281437238,0.46186629215666136,0.4722529212109346,0.46552316557369544,0.2860568992338327,0.1474961530832845,0.11985015384540504,0.1121596855373784,0.11037320154056253,0.0977025554755819,0.11021807873400585]}},"shift":{"period":"Jan\u2013Aug, 2024 vs 2026","countries":["Vietnam","Cambodia","Thailand","Indonesia","United Kingdom","Italy","Poland","Lithuania","Turkey","Canada","Brazil","Taiwan","Mexico","China"],"pts":[6.844915962013864,2.252129384009495,1.8580321022665731,0.6116011232902192,0.5855106352553466,0.4664858510608182,0.2386985331101248,0.1452671617866742,-0.117670452398843,-0.1667756321126867,-0.1811466796515562,-0.3570985853541068,-1.2508219606794049,-11.14098411650767],"value_pct":[-0.0331191401696228,0.9884563971330016,0.6853206154690861,-0.0481899062113564,0.3598248212111909,-0.1257814918157962,-0.0214808130452641,0.0285411563880297,-0.4077828703002449,-0.2294093414967382,-0.4469677397957897,-0.3682559065772586,-0.3367562555390352,-0.5248256016835231]},"products":[{"hs6":"940161","label":"Upholstered seats with wooden frames","short":"Upholstered wood seats","wood":true,"imports":5391069550.0,"import_change":-0.2352397653554646,"base_rate":0.0482707834548215,"rate":0.2255068197163087,"extra":955174438.1648176,"china_base":0.2583537066037467,"china_now":0.0833910525231491},{"hs6":"940320","label":"Other metal furniture","short":"Other metal furniture","wood":false,"imports":4458929194.0,"import_change":-0.3020076565663068,"base_rate":0.0835258275312004,"rate":0.2703313886039603,"extra":829142695.6007947,"china_base":0.3982909332390698,"china_now":0.2838497410326897},{"hs6":"940360","label":"Other wooden furniture","short":"Other wood furniture","wood":true,"imports":4851657517.0,"import_change":-0.2526052013505133,"base_rate":0.0354886115362853,"rate":0.1726019857381913,"extra":662093256.1842682,"china_base":0.1478959843585759,"china_now":0.1142008039641269},{"hs6":"940350","label":"Wooden bedroom furniture","short":"Wood bedroom furniture","wood":true,"imports":2833625142.0,"import_change":-0.1964605723721401,"base_rate":0.0105503177216167,"rate":0.1442451175697654,"extra":376829318.8962097,"china_base":0.042848618978488,"china_now":0.0197633117274197},{"hs6":"940340","label":"Wooden kitchen furniture (cabinets, vanities)","short":"Kitchen cabinets, vanities","wood":true,"imports":1872042737.0,"import_change":-0.3020369817933184,"base_rate":0.0055706206174231,"rate":0.1822084252963099,"extra":329630477.50805086,"china_base":0.0227732591174383,"china_now":0.0093641136783513},{"hs6":"940310","label":"Metal office furniture","short":"Metal office furniture","wood":false,"imports":998012793.0,"import_change":0.0777399031689891,"base_rate":0.0364201248950992,"rate":0.2123268799710146,"extra":175188357.69310817,"china_base":0.1901360454568795,"china_now":0.224260432902086},{"hs6":"940179","label":"Other seats with metal frames","short":"Other metal-frame seats","wood":false,"imports":1650609911.0,"import_change":-0.1933390292593432,"base_rate":0.1456215665119811,"rate":0.2347482279141175,"extra":146803898.41998613,"china_base":0.717656979145562,"china_now":0.3373488716438466},{"hs6":"940171","label":"Upholstered seats with metal frames","short":"Upholstered metal seats","wood":false,"imports":1353378088.0,"import_change":-0.2133664130027542,"base_rate":0.0792604002155521,"rate":0.185771931342973,"extra":144372936.3928601,"china_base":0.5522129490120934,"china_now":0.4481843347237642},{"hs6":"940389","label":"Furniture of other materials","short":"Other materials","wood":false,"imports":1056109052.0,"import_change":0.0585372581384124,"base_rate":0.0867823950207478,"rate":0.1765257507943572,"extra":94540907.24026784,"china_base":0.393448970823846,"china_now":0.2193480186173046},{"hs6":"940169","label":"Other seats with wooden frames","short":"Other wood-frame seats","wood":true,"imports":588372839.0,"import_change":-0.0950582957243152,"base_rate":0.0258022139045688,"rate":0.1569410213346946,"extra":76691416.58746403,"china_base":0.1252812664121018,"china_now":0.1165525810412196},{"hs6":"940330","label":"Wooden office furniture","short":"Wood office furniture","wood":true,"imports":938954206.0,"import_change":0.191044087263134,"base_rate":0.0477804392483588,"rate":0.0999332717515959,"extra":48921782.099053465,"china_base":0.1928011392913877,"china_now":0.1621089122636083},{"hs6":"940382","label":"Bamboo furniture","short":"Bamboo furniture","wood":false,"imports":30306029.0,"import_change":-0.5332043118227332,"base_rate":0.1067699395365647,"rate":0.3226738310985255,"extra":6513371.112426017,"china_base":0.9680687934134709,"china_now":0.6900196327272042}],"prices":{"months":["2024-01-01","2024-02-01","2024-03-01","2024-04-01","2024-05-01","2024-06-01","2024-07-01","2024-08-01","2024-09-01","2024-10-01","2024-11-01","2024-12-01","2025-01-01","2025-02-01","2025-03-01","2025-04-01","2025-05-01","2025-06-01","2025-07-01","2025-08-01","2025-09-01","2025-10-01","2025-11-01","2025-12-01","2026-01-01","2026-02-01","2026-03-01","2026-04-01","2026-05-01","2026-06-01","2026-07-01","2026-08-01"],"pre":[99.29378531073446,99.22316384180792,99.01129943502823,98.7994350282486,98.87005649717514,99.08192090395482,98.9406779661017,98.87005649717514,99.364406779661,99.85875706214688,99.85875706214688,99.50564971751412,100.0,99.85875706214688,99.92937853107344,100.14124293785312,101.05932203389833,101.05932203389833,101.41242937853109,101.5536723163842,101.69491525423727,null,101.12994350282484,100.98870056497177,101.12994350282484,101.41242937853109,101.76553672316383,101.48305084745762,102.25988700564972,102.82485875706216,103.38983050847456,103.10734463276836],"with":[100.23506140800372,99.77716616645256,98.85969021164809,98.85622109359322,99.0554226602838,99.26003436753092,99.02042090719895,98.57223931647596,98.58188876419725,98.82158789011652,99.18716722290483,99.20577075697808,100.0,100.07346514115729,102.90903435575603,105.48375641920244,110.1927580481766,110.66142051616016,113.55240898259372,113.83216582901322,116.96980555239936,null,114.02120403675517,118.55809291783198,120.78262267509996,119.40154197239715,115.400092160118,112.0042426276022,112.6623066470496,113.70948894247536,114.169388423478,114.93843159900068]}};
+
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const pct = (v, d = 1) => v == null ? "n/a" : (v * 100).toFixed(d) + "%";
+const usd = v => {
+  const a = Math.abs(v);
+  if (a >= 1e9) return "$" + (v / 1e9).toFixed(1) + "B";
+  if (a >= 1e6) return "$" + Math.round(v / 1e6).toLocaleString() + "M";
+  return "$" + Math.round(v).toLocaleString();
+};
+const monthLabel = s => new Date(s + "T00:00:00").toLocaleString("en-US", { month: "short", year: "numeric" });
+
+function hexToRgba(hex, a) {
+  const n = parseInt(hex.replace("#", ""), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+
+function tokens() {
+  return {
+    surface: css("--surface"), ink: css("--ink"), ink2: css("--ink-2"), muted: css("--muted"),
+    line: css("--line"), wash: css("--wash"), blue: css("--blue"), orange: css("--orange"),
+    aqua: css("--aqua"), red: css("--red"), font: css("--font-body"),
+  };
+}
+
+function baseLayout(t, extra = {}) {
+  const axis = { gridcolor: t.line, linecolor: t.line, zerolinecolor: t.muted, tickfont: { color: t.muted, size: 11 }, automargin: true };
+  return Object.assign({
+    paper_bgcolor: t.surface, plot_bgcolor: t.surface,
+    font: { family: t.font, color: t.ink2, size: 12 },
+    margin: { l: 8, r: 16, t: 8, b: 8 },
+    xaxis: Object.assign({}, axis), yaxis: Object.assign({}, axis),
+    hoverlabel: { bgcolor: t.surface, bordercolor: t.line, font: { color: t.ink, family: t.font } },
+    legend: { orientation: "h", x: 0, y: 1.02, yanchor: "bottom", font: { color: t.ink2, size: 11 } },
+    showlegend: true,
+  }, extra);
+}
+
+const CONFIG = { responsive: true, displayModeBar: false };
+
+// ---- text, tiles, table ----
+
+function renderStatic() {
+  const k = DATA.kpis;
+  document.getElementById("meta").textContent =
+    `Data from ${monthLabel(DATA.meta.start)} to ${monthLabel(DATA.meta.latest)}. ${DATA.meta.lines} product lines, ${DATA.meta.countries} supplier countries.`;
+
+  const total = DATA.phases.reduce((s, p) => s + p.months, 0);
+  const shades = ["--line", "--blue", "--orange", "--aqua", "--red"];
+  document.getElementById("strip").innerHTML = DATA.phases
+    .map((p, i) => `<span style="flex:${p.months / total};background:var(${shades[i]})" title="${p.name}"></span>`).join("");
+  document.getElementById("phases").innerHTML = DATA.phases.map((p, i) => `
+    <div class="phase" style="border-top-color:var(${shades[i]})">
+      <b>${p.name}</b><span class="when">${p.when}</span><p>${p.what}</p>
+    </div>`).join("");
+
+  const tiles = [
+    { label: `Effective duty rate, ${monthLabel(DATA.meta.latest)}`, value: pct(k.rate_now),
+      delta: `<strong class="up-bad">+${((k.rate_now - k.rate_2024) * 100).toFixed(1)} pts</strong> vs 2024 average of ${pct(k.rate_2024)}` },
+    { label: "Extra duty paid, last 12 months", value: usd(k.extra_duty),
+      delta: "compared with the same goods at 2024 rates" },
+    { label: `China's share of imports, ${k.period}`, value: pct(k.china_now),
+      delta: `<strong class="down-bad">${((k.china_now - k.china_base) * 100).toFixed(1)} pts</strong> from ${pct(k.china_base)} two years earlier` },
+    { label: "Supplier prices before duty", value: (k.price_change >= 0 ? "+" : "") + pct(k.price_change),
+      delta: `since Jan 2025, while duty-inclusive cost rose ${pct(k.cost_change, 0)}` },
+  ];
+  document.getElementById("kpis").innerHTML = tiles.map(t => `
+    <div class="kpi"><span class="label">${t.label}</span><span class="value">${t.value}</span><span class="delta">${t.delta}</span></div>`).join("");
+
+  document.getElementById("shift-sub").textContent =
+    `Change in share of US furniture imports, ${DATA.shift.period}. Same months each year.`;
+  document.getElementById("table-sub").textContent =
+    `Last 12 months (${DATA.meta.ttm}) compared with calendar 2024. Sorted by extra duty.`;
+
+  document.querySelector("#products tbody").innerHTML = DATA.products.map(p => `
+    <tr>
+      <td class="code">${p.hs6}</td>
+      <td>${p.label}${p.wood ? '<span class="tag">wood</span>' : ""}</td>
+      <td>${usd(p.imports)}</td>
+      <td>${(p.import_change >= 0 ? "+" : "") + pct(p.import_change, 0)}</td>
+      <td>${pct(p.base_rate)}</td>
+      <td>${pct(p.rate)}</td>
+      <td>${usd(p.extra)}</td>
+      <td>${pct(p.china_base, 0)}</td>
+      <td>${pct(p.china_now, 0)}</td>
+    </tr>`).join("");
+
+  if (DATA.meta.missing) {
+    const li = document.getElementById("missing-note");
+    li.textContent = DATA.meta.missing;
+    li.hidden = false;
+  }
+
+  const sel = document.getElementById("supplier");
+  sel.innerHTML = Object.keys(DATA.suppliers.rates).map(c => `<option value="${c}">${c}</option>`).join("");
+  sel.value = "China";
+  sel.addEventListener("change", () => drawSupplier(tokens()));
+}
+
+// ---- charts ----
+
+function drawMonthly(t) {
+  const m = DATA.monthly;
+  const wide = document.getElementById("c-monthly").clientWidth > 640;
+  const shapes = [], annotations = [];
+  DATA.phases.forEach((p, i) => {
+    if (i % 2) shapes.push({ type: "rect", xref: "x", yref: "paper", x0: p.x0, x1: p.x1, y0: 0, y1: 1, fillcolor: t.wash, line: { width: 0 }, layer: "below" });
+    // skip phase labels on small screens, they overlap
+    if (i > 0 && wide) annotations.push({ x: p.mid, y: 1, xref: "x", yref: "paper", yanchor: "bottom", text: p.short, showarrow: false, font: { size: 10, color: t.muted } });
+  });
+  const series = [["All furniture", m.all, t.blue, 3], ["Wood", m.wood, t.orange, 2], ["Non-wood", m.nonwood, t.aqua, 2]];
+  const traces = series.map(([name, y, color, w]) => ({
+    x: m.months, y, name, type: "scatter", mode: "lines",
+    line: { color, width: w }, hovertemplate: `${name}: %{y:.1%}<extra></extra>`,
+  }));
+  Plotly.react("c-monthly", traces, baseLayout(t, {
+    shapes, annotations, hovermode: "x unified",
+    margin: { l: 8, r: 16, t: wide ? 28 : 8, b: 8 },
+    yaxis: Object.assign(baseLayout(t).yaxis, { tickformat: ".0%", rangemode: "tozero" }),
+    legend: { orientation: "h", x: 0, y: 0.98, font: { color: t.ink2, size: 11 }, bgcolor: "rgba(0,0,0,0)" },
+  }), CONFIG);
+}
+
+function drawSupplier(t) {
+  const s = DATA.suppliers, name = document.getElementById("supplier").value;
+  const traces = [
+    { x: s.months, y: s.all, name: "All suppliers", type: "scatter", mode: "lines", line: { color: t.muted, width: 2 }, hovertemplate: "All suppliers: %{y:.1%}<extra></extra>" },
+    { x: s.months, y: s.rates[name], name, type: "scatter", mode: "lines", line: { color: t.blue, width: 2.5 }, hovertemplate: `${name}: %{y:.1%}<extra></extra>` },
+  ];
+  Plotly.react("c-supplier", traces, baseLayout(t, {
+    hovermode: "x unified",
+    yaxis: Object.assign(baseLayout(t).yaxis, { tickformat: ".0%", rangemode: "tozero" }),
+  }), CONFIG);
+}
+
+function drawPrices(t) {
+  const p = DATA.prices;
+  const traces = [
+    { x: p.months, y: p.pre, name: "Supplier price before duty", type: "scatter", mode: "lines", line: { color: t.blue, width: 2.5 }, connectgaps: false, hovertemplate: "Before duty: %{y:.1f}<extra></extra>" },
+    { x: p.months, y: p.with, name: "Price including duty", type: "scatter", mode: "lines", line: { color: t.orange, width: 2.5 }, fill: "tonexty", fillcolor: hexToRgba(t.orange, 0.12), connectgaps: false, hovertemplate: "With duty: %{y:.1f}<extra></extra>" },
+  ];
+  Plotly.react("c-prices", traces, baseLayout(t, { hovermode: "x unified" }), CONFIG);
+}
+
+function drawShift(t) {
+  const s = DATA.shift;
+  const trace = {
+    type: "bar", orientation: "h", y: s.countries, x: s.pts,
+    marker: { color: s.pts.map(v => v > 0 ? t.blue : t.red) },
+    text: s.pts.map(v => (v > 0 ? "+" : "") + v.toFixed(1)), textposition: "outside", cliponaxis: false,
+    textfont: { color: t.ink, size: 11 },
+    customdata: s.value_pct.map(v => (v >= 0 ? "+" : "") + (v * 100).toFixed(0) + "%"),
+    hovertemplate: "%{y}: %{x:+.1f} pts of share<br>Dollar value %{customdata}<extra></extra>",
+  };
+  const lim = Math.max(...s.pts.map(Math.abs)) * 1.3;
+  Plotly.react("c-shift", [trace], baseLayout(t, {
+    showlegend: false, bargap: 0.35,
+    xaxis: Object.assign(baseLayout(t).xaxis, { range: [-lim, lim * 0.75], ticksuffix: " pts", zeroline: true }),
+    yaxis: Object.assign(baseLayout(t).yaxis, { autorange: "reversed", gridcolor: "rgba(0,0,0,0)" }),
+  }), CONFIG);
+}
+
+function drawExtra(t) {
+  const rows = [...DATA.products].sort((a, b) => b.extra - a.extra);
+  const make = (wood, name, color) => {
+    const r = rows.filter(p => p.wood === wood);
+    return {
+      type: "bar", orientation: "h", name, y: r.map(p => p.short), x: r.map(p => p.extra / 1e6),
+      marker: { color }, text: r.map(p => "$" + Math.round(p.extra / 1e6) + "M"), textposition: "outside",
+      cliponaxis: false, textfont: { color: t.ink, size: 11 },
+      customdata: r.map(p => p.hs6), hovertemplate: "%{y} (%{customdata})<br>$%{x:,.0f}M extra duty<extra></extra>",
+    };
+  };
+  Plotly.react("c-extra", [make(true, "Wood", t.orange), make(false, "Non-wood", t.blue)], baseLayout(t, {
+    bargap: 0.35, barmode: "overlay",
+    xaxis: Object.assign(baseLayout(t).xaxis, { ticksuffix: "M", tickprefix: "$", nticks: 4, range: [0, Math.max(...rows.map(p => p.extra)) / 1e6 * 1.3] }),
+    yaxis: Object.assign(baseLayout(t).yaxis, { categoryorder: "array", categoryarray: rows.map(p => p.short).reverse(), gridcolor: "rgba(0,0,0,0)" }),
+  }), CONFIG);
+}
+
+function drawAll() {
+  if (!window.Plotly) return;
+  const t = tokens();
+  drawMonthly(t); drawSupplier(t); drawPrices(t); drawShift(t); drawExtra(t);
+}
+
+renderStatic();
+drawAll();
+
+// redraw on theme change / resize
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
+new MutationObserver(drawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+let resizeTimer;
+window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(drawAll, 200); });
+</script>
+</body>
+</html>

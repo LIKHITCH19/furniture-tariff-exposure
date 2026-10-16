@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Furniture Tariff Exposure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* dark mode colors are below the light ones */
+:root {
+  --page: #f5f6f7;
+  --surface: #ffffff;
+  --ink: #15191d;
+  --ink-2: #4b535b;
+  --muted: #868e96;
+  --line: #e2e5e8;
+  --wash: #eef0f2;
+  --blue: #2a78d6;
+  --orange: #eb6834;
+  --aqua: #1baf7a;
+  --red: #e34948;
+  --good: #1f7a3a;
+  --bad: #b8322f;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0e1113; --surface: #161a1d; --ink: #edf0f2; --ink-2: #b8bfc5; --muted: #848c93;
+    --line: #2a3035; --wash: #1d2226; --blue: #3987e5; --orange: #d95926; --aqua: #199e70;
+    --red: #e66767; --good: #4cc26e; --bad: #f07a77; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #0e1113; --surface: #161a1d; --ink: #edf0f2; --ink-2: #b8bfc5; --muted: #848c93;
+  --line: #2a3035; --wash: #1d2226; --blue: #3987e5; --orange: #d95926; --aqua: #199e70;
+  --red: #e66767; --good: #4cc26e; --bad: #f07a77; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 48px; display: grid; gap: 28px; }
+h1, h2 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; margin: 0; color: var(--ink); }
+h1 { font-size: clamp(1.9rem, 4.5vw, 2.6rem); line-height: 1.1; letter-spacing: -0.01em; }
+h2 { font-size: 1.25rem; line-height: 1.25; }
+p { margin: 0; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.dek { color: var(--ink-2); max-width: 68ch; margin-top: 10px; }
+.meta { font-size: 0.82rem; color: var(--muted); margin-top: 10px; }
+header { display: grid; gap: 4px; }
+
+/* policy timeline */
+.timeline { display: grid; gap: 10px; }
+.strip { display: flex; height: 10px; border-radius: 3px; overflow: hidden; gap: 2px; }
+.strip span { display: block; height: 100%; }
+.phases { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.phase { min-width: 0; border-top: 2px solid var(--line); padding-top: 8px; }
+.phase b { display: block; font-size: 0.86rem; font-weight: 600; }
+.phase .when { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); }
+.phase p { font-size: 0.8rem; color: var(--ink-2); margin-top: 4px; }
+
+/* headline figures */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 4px; align-content: start; }
+.kpi .label { font-size: 0.82rem; color: var(--ink-2); }
+.kpi .value { font-size: 1.9rem; font-weight: 600; line-height: 1.15; }
+.kpi .delta { font-size: 0.8rem; color: var(--muted); }
+.kpi .delta strong { font-weight: 600; }
+.up-bad { color: var(--bad); }
+.down-bad { color: var(--bad); }
+
+/* chart cards */
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 18px 10px; min-width: 0; display: grid; gap: 6px; align-content: start; }
+.card .sub { font-size: 0.85rem; color: var(--ink-2); }
+.card .src { font-size: 0.74rem; color: var(--muted); padding-bottom: 6px; }
+.chart { width: 100%; height: 340px; }
+.chart.tall { height: 400px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 0.85rem; color: var(--ink-2); }
+select {
+  font: inherit; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px;
+}
+select:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+
+/* table */
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+th, td { padding: 8px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+td:nth-child(2) { white-space: normal; min-width: 200px; }
+th { font-weight: 600; color: var(--ink-2); font-size: 0.78rem; }
+th:nth-child(-n+2), td:nth-child(-n+2) { text-align: left; }
+td.code { font-family: var(--font-mono); color: var(--ink-2); }
+.tag { display: inline-block; font-size: 0.7rem; padding: 1px 6px; border-radius: 3px; background: var(--wash); color: var(--ink-2); margin-left: 6px; }
+
+.notes { display: grid; gap: 10px; font-size: 0.86rem; color: var(--ink-2); max-width: 78ch; }
+.notes ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.notes a { color: var(--blue); }
+
+@media (max-width: 860px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid2 { grid-template-columns: minmax(0, 1fr); }
+  .phases { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 460px) {
+  .wrap { padding-inline: 16px; }
+  .kpi .value { font-size: 1.6rem; }
+  .phases { grid-template-columns: minmax(0, 1fr); }
+  .chart { height: 300px; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">US imports &middot; HS chapter 94 &middot; furniture</span>
+    <h1>Furniture tariff exposure</h1>
+    <p class="dek">How much duty US furniture importers are paying, which product lines took the biggest hit,
+      and where sourcing is moving. Built from Census trade records and the BLS import price index.</p>
+    <p class="meta" id="meta"></p>
+  </header>
+
+  <section class="timeline" aria-label="Tariff policy phases">
+    <div class="strip" id="strip"></div>
+    <div class="phases" id="phases"></div>
+  </section>
+
+  <section class="kpis" id="kpis" aria-label="Headline figures"></section>
+
+  <section class="card">
+    <h2>Effective duty rate, month by month</h2>
+    <p class="sub">Calculated duty as a share of customs value. Wood lines picked up the Section 232 duty from October 2025.</p>
+    <div class="chart tall" id="c-monthly"></div>
+    <p class="src">Source: US Census Bureau international trade API.</p>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Duty rate by supplier</h2>
+      <div class="controls">
+        <label for="supplier">Supplier</label>
+        <select id="supplier"></select>
+        <span>compared with all suppliers</span>
+      </div>
+      <div class="chart" id="c-supplier"></div>
+      <p class="src">Source: US Census Bureau. Ten largest suppliers by value.</p>
+    </section>
+
+    <section class="card">
+      <h2>Who paid the tariff</h2>
+      <p class="sub">Supplier prices before duty barely moved, so the duty landed on US buyers. Index, Jan 2025 = 100.</p>
+      <div class="chart" id="c-prices"></div>
+      <p class="src">Sources: BLS import price index EIUIR41000 (excludes duty); Census calculated duty. BLS did not publish Oct 2025.</p>
+    </section>
+  </div>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Where sourcing moved</h2>
+      <p class="sub" id="shift-sub"></p>
+      <div class="chart tall" id="c-shift"></div>
+      <p class="src">Source: US Census Bureau. Suppliers with $50M+ in either period; changes under 0.1 points hidden.</p>
+    </section>
+
+    <section class="card">
+      <h2>Extra duty by product line</h2>
+      <p class="sub">Last 12 months of duty minus what the same goods would have paid at 2024 rates.</p>
+      <div class="chart tall" id="c-extra"></div>
+      <p class="src">Source: US Census Bureau.</p>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Product line detail</h2>
+    <p class="sub" id="table-sub"></p>
+    <div class="table-wrap">
+      <table id="products">
+        <thead>
+          <tr>
+            <th>HS6</th><th>Product line</th><th>Imports, last 12 mo</th><th>vs 2024</th>
+            <th>Duty rate 2024</th><th>Duty rate now</th><th>Extra duty</th><th>China share 2024</th><th>China share now</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="notes">
+    <h2>Notes on the data</h2>
+    <ul>
+      <li>Effective rate = calculated duty / customs value of goods entered for consumption. It is an average across everything shipped under a product code, so a single item can sit above or below it.</li>
+      <li>November 2025 shows a one-month drop in duty on upholstered wood seating (940161) and kitchen cabinets (940340) from suppliers other than China, then a full recovery in December. I could not find a policy change that explains it, so it is left in the data and flagged here.</li>
+      <li>The BLS series covers "furniture, household goods", which is broader than HS chapter 94. It is the closest furniture import price series BLS still publishes monthly.</li>
+      <li id="missing-note" hidden></li>
+    </ul>
+    <p>Sources: <a href="https://www.census.gov/data/developers/data-sets/international-trade.html">US Census Bureau international trade API</a> &middot;
+      <a href="https://www.bls.gov/mxp/">BLS Import/Export Price Indexes</a></p>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-basic-dist-min@2.35.2/plotly-basic.min.js"></script>
+<script>
+const DATA = /*__DATA__*/null;
+
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const pct = (v, d = 1) => v == null ? "n/a" : (v * 100).toFixed(d) + "%";
+const usd = v => {
+  const a = Math.abs(v);
+  if (a >= 1e9) return "$" + (v / 1e9).toFixed(1) + "B";
+  if (a >= 1e6) return "$" + Math.round(v / 1e6).toLocaleString() + "M";
+  return "$" + Math.round(v).toLocaleString();
+};
+const monthLabel = s => new Date(s + "T00:00:00").toLocaleString("en-US", { month: "short", year: "numeric" });
+
+function hexToRgba(hex, a) {
+  const n = parseInt(hex.replace("#", ""), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+
+function tokens() {
+  return {
+    surface: css("--surface"), ink: css("--ink"), ink2: css("--ink-2"), muted: css("--muted"),
+    line: css("--line"), wash: css("--wash"), blue: css("--blue"), orange: css("--orange"),
+    aqua: css("--aqua"), red: css("--red"), font: css("--font-body"),
+  };
+}
+
+function baseLayout(t, extra = {}) {
+  const axis = { gridcolor: t.line, linecolor: t.line, zerolinecolor: t.muted, tickfont: { color: t.muted, size: 11 }, automargin: true };
+  return Object.assign({
+    paper_bgcolor: t.surface, plot_bgcolor: t.surface,
+    font: { family: t.font, color: t.ink2, size: 12 },
+    margin: { l: 8, r: 16, t: 8, b: 8 },
+    xaxis: Object.assign({}, axis), yaxis: Object.assign({}, axis),
+    hoverlabel: { bgcolor: t.surface, bordercolor: t.line, font: { color: t.ink, family: t.font } },
+    legend: { orientation: "h", x: 0, y: 1.02, yanchor: "bottom", font: { color: t.ink2, size: 11 } },
+    showlegend: true,
+  }, extra);
+}
+
+const CONFIG = { responsive: true, displayModeBar: false };
+
+// ---- text, tiles, table ----
+
+function renderStatic() {
+  const k = DATA.kpis;
+  document.getElementById("meta").textContent =
+    `Data from ${monthLabel(DATA.meta.start)} to ${monthLabel(DATA.meta.latest)}. ${DATA.meta.lines} product lines, ${DATA.meta.countries} supplier countries.`;
+
+  const total = DATA.phases.reduce((s, p) => s + p.months, 0);
+  const shades = ["--line", "--blue", "--orange", "--aqua", "--red"];
+  document.getElementById("strip").innerHTML = DATA.phases
+    .map((p, i) => `<span style="flex:${p.months / total};background:var(${shades[i]})" title="${p.name}"></span>`).join("");
+  document.getElementById("phases").innerHTML = DATA.phases.map((p, i) => `
+    <div class="phase" style="border-top-color:var(${shades[i]})">
+      <b>${p.name}</b><span class="when">${p.when}</span><p>${p.what}</p>
+    </div>`).join("");
+
+  const tiles = [
+    { label: `Effective duty rate, ${monthLabel(DATA.meta.latest)}`, value: pct(k.rate_now),
+      delta: `<strong class="up-bad">+${((k.rate_now - k.rate_2024) * 100).toFixed(1)} pts</strong> vs 2024 average of ${pct(k.rate_2024)}` },
+    { label: "Extra duty paid, last 12 months", value: usd(k.extra_duty),
+      delta: "compared with the same goods at 2024 rates" },
+    { label: `China's share of imports, ${k.period}`, value: pct(k.china_now),
+      delta: `<strong class="down-bad">${((k.china_now - k.china_base) * 100).toFixed(1)} pts</strong> from ${pct(k.china_base)} two years earlier` },
+    { label: "Supplier prices before duty", value: (k.price_change >= 0 ? "+" : "") + pct(k.price_change),
+      delta: `since Jan 2025, while duty-inclusive cost rose ${pct(k.cost_change, 0)}` },
+  ];
+  document.getElementById("kpis").innerHTML = tiles.map(t => `
+    <div class="kpi"><span class="label">${t.label}</span><span class="value">${t.value}</span><span class="delta">${t.delta}</span></div>`).join("");
+
+  document.getElementById("shift-sub").textContent =
+    `Change in share of US furniture imports, ${DATA.shift.period}. Same months each year.`;
+  document.getElementById("table-sub").textContent =
+    `Last 12 months (${DATA.meta.ttm}) compared with calendar 2024. Sorted by extra duty.`;
+
+  document.querySelector("#products tbody").innerHTML = DATA.products.map(p => `
+    <tr>
+      <td class="code">${p.hs6}</td>
+      <td>${p.label}${p.wood ? '<span class="tag">wood</span>' : ""}</td>
+      <td>${usd(p.imports)}</td>
+      <td>${(p.import_change >= 0 ? "+" : "") + pct(p.import_change, 0)}</td>
+      <td>${pct(p.base_rate)}</td>
+      <td>${pct(p.rate)}</td>
+      <td>${usd(p.extra)}</td>
+      <td>${pct(p.china_base, 0)}</td>
+      <td>${pct(p.china_now, 0)}</td>
+    </tr>`).join("");
+
+  if (DATA.meta.missing) {
+    const li = document.getElementById("missing-note");
+    li.textContent = DATA.meta.missing;
+    li.hidden = false;
+  }
+
+  const sel = document.getElementById("supplier");
+  sel.innerHTML = Object.keys(DATA.suppliers.rates).map(c => `<option value="${c}">${c}</option>`).join("");
+  sel.value = "China";
+  sel.addEventListener("change", () => drawSupplier(tokens()));
+}
+
+// ---- charts ----
+
+function drawMonthly(t) {
+  const m = DATA.monthly;
+  const wide = document.getElementById("c-monthly").clientWidth > 640;
+  const shapes = [], annotations = [];
+  DATA.phases.forEach((p, i) => {
+    if (i % 2) shapes.push({ type: "rect", xref: "x", yref: "paper", x0: p.x0, x1: p.x1, y0: 0, y1: 1, fillcolor: t.wash, line: { width: 0 }, layer: "below" });
+    // skip phase labels on small screens, they overlap
+    if (i > 0 && wide) annotations.push({ x: p.mid, y: 1, xref: "x", yref: "paper", yanchor: "bottom", text: p.short, showarrow: false, font: { size: 10, color: t.muted } });
+  });
+  const series = [["All furniture", m.all, t.blue, 3], ["Wood", m.wood, t.orange, 2], ["Non-wood", m.nonwood, t.aqua, 2]];
+  const traces = series.map(([name, y, color, w]) => ({
+    x: m.months, y, name, type: "scatter", mode: "lines",
+    line: { color, width: w }, hovertemplate: `${name}: %{y:.1%}<extra></extra>`,
+  }));
+  Plotly.react("c-monthly", traces, baseLayout(t, {
+    shapes, annotations, hovermode: "x unified",
+    margin: { l: 8, r: 16, t: wide ? 28 : 8, b: 8 },
+    yaxis: Object.assign(baseLayout(t).yaxis, { tickformat: ".0%", rangemode: "tozero" }),
+    legend: { orientation: "h", x: 0, y: 0.98, font: { color: t.ink2, size: 11 }, bgcolor: "rgba(0,0,0,0)" },
+  }), CONFIG);
+}
+
+function drawSupplier(t) {
+  const s = DATA.suppliers, name = document.getElementById("supplier").value;
+  const traces = [
+    { x: s.months, y: s.all, name: "All suppliers", type: "scatter", mode: "lines", line: { color: t.muted, width: 2 }, hovertemplate: "All suppliers: %{y:.1%}<extra></extra>" },
+    { x: s.months, y: s.rates[name], name, type: "scatter", mode: "lines", line: { color: t.blue, width: 2.5 }, hovertemplate: `${name}: %{y:.1%}<extra></extra>` },
+  ];
+  Plotly.react("c-supplier", traces, baseLayout(t, {
+    hovermode: "x unified",
+    yaxis: Object.assign(baseLayout(t).yaxis, { tickformat: ".0%", rangemode: "tozero" }),
+  }), CONFIG);
+}
+
+function drawPrices(t) {
+  const p = DATA.prices;
+  const traces = [
+    { x: p.months, y: p.pre, name: "Supplier price before duty", type: "scatter", mode: "lines", line: { color: t.blue, width: 2.5 }, connectgaps: false, hovertemplate: "Before duty: %{y:.1f}<extra></extra>" },
+    { x: p.months, y: p.with, name: "Price including duty", type: "scatter", mode: "lines", line: { color: t.orange, width: 2.5 }, fill: "tonexty", fillcolor: hexToRgba(t.orange, 0.12), connectgaps: false, hovertemplate: "With duty: %{y:.1f}<extra></extra>" },
+  ];
+  Plotly.react("c-prices", traces, baseLayout(t, { hovermode: "x unified" }), CONFIG);
+}
+
+function drawShift(t) {
+  const s = DATA.shift;
+  const trace = {
+    type: "bar", orientation: "h", y: s.countries, x: s.pts,
+    marker: { color: s.pts.map(v => v > 0 ? t.blue : t.red) },
+    text: s.pts.map(v => (v > 0 ? "+" : "") + v.toFixed(1)), textposition: "outside", cliponaxis: false,
+    textfont: { color: t.ink, size: 11 },
+    customdata: s.value_pct.map(v => (v >= 0 ? "+" : "") + (v * 100).toFixed(0) + "%"),
+    hovertemplate: "%{y}: %{x:+.1f} pts of share<br>Dollar value %{customdata}<extra></extra>",
+  };
+  const lim = Math.max(...s.pts.map(Math.abs)) * 1.3;
+  Plotly.react("c-shift", [trace], baseLayout(t, {
+    showlegend: false, bargap: 0.35,
+    xaxis: Object.assign(baseLayout(t).xaxis, { range: [-lim, lim * 0.75], ticksuffix: " pts", zeroline: true }),
+    yaxis: Object.assign(baseLayout(t).yaxis, { autorange: "reversed", gridcolor: "rgba(0,0,0,0)" }),
+  }), CONFIG);
+}
+
+function drawExtra(t) {
+  const rows = [...DATA.products].sort((a, b) => b.extra - a.extra);
+  const make = (wood, name, color) => {
+    const r = rows.filter(p => p.wood === wood);
+    return {
+      type: "bar", orientation: "h", name, y: r.map(p => p.short), x: r.map(p => p.extra / 1e6),
+      marker: { color }, text: r.map(p => "$" + Math.round(p.extra / 1e6) + "M"), textposition: "outside",
+      cliponaxis: false, textfont: { color: t.ink, size: 11 },
+      customdata: r.map(p => p.hs6), hovertemplate: "%{y} (%{customdata})<br>$%{x:,.0f}M extra duty<extra></extra>",
+    };
+  };
+  Plotly.react("c-extra", [make(true, "Wood", t.orange), make(false, "Non-wood", t.blue)], baseLayout(t, {
+    bargap: 0.35, barmode: "overlay",
+    xaxis: Object.assign(baseLayout(t).xaxis, { ticksuffix: "M", tickprefix: "$", nticks: 4, range: [0, Math.max(...rows.map(p => p.extra)) / 1e6 * 1.3] }),
+    yaxis: Object.assign(baseLayout(t).yaxis, { categoryorder: "array", categoryarray: rows.map(p => p.short).reverse(), gridcolor: "rgba(0,0,0,0)" }),
+  }), CONFIG);
+}
+
+function drawAll() {
+  if (!window.Plotly) return;
+  const t = tokens();
+  drawMonthly(t); drawSupplier(t); drawPrices(t); drawShift(t); drawExtra(t);
+}
+
+renderStatic();
+drawAll();
+
+// redraw on theme change / resize
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
+new MutationObserver(drawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+let resizeTimer;
+window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(drawAll, 200); });
+</script>
+</body>
+</html>
