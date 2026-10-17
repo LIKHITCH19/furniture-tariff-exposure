@@ -21,7 +21,7 @@ real.
 - **Interactive dashboard:** `output/dashboard.html` (download and open in a browser)
 - **Scenario model:** `output/landed_cost_model.xlsx`
 
-## The short version
+## Summary
 
 - The effective duty rate on furniture went from 5.3% in 2024 to a peak of
   25.9% in January 2026. It was still 17.5% in August 2026, after the Supreme
@@ -140,22 +140,21 @@ Vietnamese factory can charge before the move stops paying off.
 
 ## If I were the importer
 
-1. **Move bedroom, other wood and other metal furniture first.** That's where the
-   China gap is widest: a new supplier can be about 18-21% more expensive and
-   still come out ahead.
-2. **Don't expect much from moving upholstered seating or cabinets.** Section
-   232 applies from every country, so the room is only about 10-11%. On these
-   lines, negotiating price with existing suppliers is likely worth more than a
-   move.
-3. **Check USMCA qualification before taking the Mexico number seriously.**
-   Mexico wins in the model on cheaper freight and low duty on its
-   non-upholstered furniture (0% on bedroom furniture, under 5% on metal
-   furniture, most likely USMCA goods). Section 232 still applies to Mexican
-   seating and cabinets. If the goods don't qualify for USMCA, a big part of
-   the advantage goes away.
-4. **Ask a customs broker about IEEPA refunds.** Duty paid under IEEPA between
-   February 2025 and February 2026 may be recoverable, which could be a lot of
-   money for a company this size.
+1. Start with bedroom, other wood and other metal furniture. That's where the
+   gap with China is biggest: a new supplier could be about 18-21% more
+   expensive and the move would still pay off.
+2. Don't expect much from moving upholstered seating or cabinets. Section 232
+   applies no matter where they come from, so there's only about 10-11% of
+   room. For these, pushing existing suppliers on price is probably worth more
+   than switching.
+3. Check USMCA qualification before getting excited about Mexico. Mexico comes
+   out cheapest in the model because of cheaper freight and low duty on its
+   non-upholstered furniture (0% on bedroom, under 5% on metal, most likely
+   USMCA goods). Section 232 still hits Mexican seating and cabinets, and if
+   the goods don't qualify for USMCA a lot of that advantage disappears.
+4. Ask a customs broker about IEEPA refunds. Duty paid under IEEPA between
+   February 2025 and February 2026 may be recoverable, and for a company this
+   size that could be real money.
 
 ## How the numbers were checked
 
@@ -174,26 +173,34 @@ I also checked a BLS value against FRED's published copy of the same series,
 and recalculated every scenario in the Excel model independently in Python;
 they match to the dollar.
 
-## Caveats
+## Limitations
 
-- HS6 codes are broad. Rates are averages across everything shipped under a
-  code. Section 232 coverage, exclusions and USMCA
-  qualification are decided at the 10-digit level or by the specific shipment.
-- Census "calculated duty" is what was charged at entry. If the IEEPA refunds
-  get paid, the real cost for Feb 2025 - Feb 2026 ends up lower than the data
-  shows.
+- HS6 codes are broad, so every rate here is an average across a whole code.
+  Section 232 coverage, exclusions and USMCA qualification get decided at the
+  10-digit level or per shipment.
+- Census "calculated duty" is what got charged at entry. If the IEEPA refunds
+  are paid, the real cost for Feb 2025 - Feb 2026 is lower than shown.
 - November 2025 has a one-month drop in duty on upholstered seating and
-  cabinets from non-China suppliers, then a full recovery in December. I
-  couldn't find a policy change behind it, so it stays in the data and is
-  flagged on the chart.
-- The BLS series is broader than furniture ("furniture, household goods").
-  It is the closest monthly series BLS still publishes. October 2025 is
-  missing because BLS didn't publish it.
-- Office chairs and sofa beds aren't in the numbers yet. The 2022 HS revision
-  split their codes, and the old ones return nothing. The new codes are in the
-  fetch script; rerunning it adds them.
-- The company in the scenario model is invented. Freight rates and the
-  sourcing mix are placeholders to be replaced with real quotes.
+  cabinets from non-China suppliers, then it goes right back in December. I
+  couldn't find a policy reason for it, so I left it in and flagged it on the
+  chart.
+- The BLS series covers "furniture, household goods", which is wider than HS
+  chapter 94, but it's the closest monthly series BLS still publishes. It has
+  no October 2025 value.
+- Office chairs and sofa beds aren't in the numbers yet (their codes were
+  split in the 2022 HS revision).
+- The importer in the scenario model is made up. Freight rates and the
+  sourcing mix are placeholders.
+
+## What I'd do next
+
+- Add office chairs and sofa beds. The new codes are already in
+  `src/fetch_census.py`, so it's one rerun.
+- Go down to 10-digit HTS codes to separate the lines Section 232 actually
+  covers from the rest.
+- Rerun once Census publishes September and October 2026, the first full
+  months under the new Section 301 rates.
+- Rebuild the dashboard in Power BI.
 
 ## Run it yourself
 
